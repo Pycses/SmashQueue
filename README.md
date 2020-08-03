@@ -1,58 +1,153 @@
-# Extensions-Hello-World
-The Simplest Extension in the (Hello) World.
+# Twitch Extension React Boilerplate
 
-## Motivation
-The Hello World sample is designed to get you started building a Twitch Extension quickly. It contains all the key parts of a functioning Extension and can be immediately run in the [Developer Rig](https://github.com/twitchdev/developer-rig).  For a fast guide to get started, visit the Developer Rig documentation.
+- [Twitch Extension React Boilerplate](#twitch-extension-react-boilerplate)
+  - [Requirements](#requirements)
+  - [First time Usage](#first-time-usage)
+    - [Developer Rig Usage](#developer-rig-usage)
+    - [Local Development](#local-development)
+      - [Loading the Sample on Twitch](#loading-the-sample-on-twitch)
+  - [Moving to Hosted Test (and beyond!)](#moving-to-hosted-test-and-beyond)
+    - [Webpack Config](#webpack-config)
+    - [Authentication](#authentication)
+  - [File Structure](#file-structure)
+    - [dist](#dist)
+    - [public](#public)
+    - [src](#src)
 
-## What's in the Sample
-The Hello World Extension provides a simple scenario that demonstrates the end-to-end flow of an Extension. On the frontend, a user clicks a button that can change the color of a circle. Instead of changing the CSS locally, it calls its Extension Backend Service (EBS) to update the color of the circle. That message is then sent via Twitch PubSub to update all clients listening to the PubSub topic.
+## Requirements
 
-__The sample is broken into two main components:__
+There is only one requirement to use this template.
 
-1. The Frontend of the Extension, comprised of HTML files for the different extension views and corresponding Javascript files and CSS. The frontend has the following functionality:
-    * A button and script that makes a POST call to the EBS to request a color change for the circle
-    * A GET call when the Extension is initialized to change the circle to the current color stored on the EBS
-    * A listener to Twitch PubSub, that receives color change updates and then updates the circle color
-2. A lightweight EBS that performs the following functionality:
-    * Spins up a simple HTTPS server with a POST handler for changing color
-    * Validates an Extension JWT
-    * Sends a new color message via Twitch PubSub for a specific channel
+- Node.JS LTS or greater.
 
-## Using the Sample
-The recommended path to using this sample is with the [Developer Rig](https://github.com/twitchdev/developer-rig).  Use the Developer Rig's `extension-init` command to clone this repository.
+## First time Usage
 
-The Developer Rig is able to host the frontend Hello World files, but the EBS must be run and hosted separately.
+There are two ways to develop extensions- the first is the [Developer Rig](#developer-rig-usage), which is the preferred option. The second is to use [Local Test](#local-development) and test on Twitch on your channel page.
 
-### Setting Up Your Backend Certificates
-Twitch Extensions require SSL (TLS).
+### [Developer Rig](https://dev.twitch.tv/docs/extensions/rig/) Usage
 
-If you're using the Developer Rig and used it to create this extension, it will have already configured the certificates.  Otherwise, you'll need to set up a certificate for local development.  This will generate a new certificate (`server.crt` and `server.key`) for you and place it in the `conf/` directory. This certificate is different from the one used for the Developer Rig.
+If you are using the [Developer Rig](https://dev.twitch.tv/docs/extensions/rig/) and have used this as your basis for your extension, this is easy to start with. The full steps are:
 
-#### On MacOS
-Navigate to the root of the Hello World extension folder and run `npm install` and then `npm run cert`
+1. Click on Add Project, then Create Project
+2. Either create a new extension or use an existing one and hit "Next"
+3. Choose "Use boilerplate code" under "Add Code to your Project" and hit "Next"
+4. Let the boilerplate code download, install dependencies, and complete. Once finished, hit "Get Started"
+5. Click on "Run Frontend" and add views in the "Extension Views" tab
+6. Accept any certificate errors, as the certificate is self-signed
+7. You can now make changes in real-time and it'll update in all views!
 
-#### On Windows
-Run the following commands to generate the necessary certificates for your Hello World backend
-1. `node scripts/ssl.js`
-2. `mkdir ../my-extension/conf`
-3. `mv ssl/selfsigned.crt ../my-extension/conf/server.crt`
-4. `mv ssl/selfsigned.key ../my-extension/conf/server.key`
+**Please note that HTTPS only works with the Developer Rig version 1.1.4 and above.**
 
-### Running Hello World
-If you're using the Developer Rig, it has buttons in its UI to perform the following actions.
+If you are using a version below that, please either upgrade the Developer Rig (by either auto-updating or reinstalling the Developer Rig) or disable HTTPS. To disable HTTPS:
 
-To run the EBS, run `node services/backend`, with the following command line arguments: `-c <client id>`, `-s <secret>`, `-o <owner id>`.
+1. Go into `/webpack.config.js`.
+2. Update `config.devServer.https = true` to `config.devServer.https = false`.
+3. On the [Twitch Developer Console](https://dev.twitch.tv/console), make sure to update the Asset Hosting path for your extension to use http instead.
+4. Refresh your manifest in the Developer Rig and recreate your views.
 
-This provides the EBS with your Extension client ID, Extension secret and the user ID of the Extension owner (likely you). These are necessary to validate calls to your EBS and make calls to Twitch services such as PubSub.
+### Local Development
 
-If you do not want to pass in command line arguments, you can also directly set the following environment variables: `EXT_SECRET`, `EXT_CLIENT_ID`, `EXT_OWNER_ID` in your code.
+If you're wanting to develop this locally, use the below instructions.
+To use this, simply clone the repository into the folder of your choice.
 
-You can get your client ID and secret from your [Extension Dashboard](https://dev.twitch.tv/dashboard/extensions).
-
-To get the owner ID, you will need to execute a simple CURL command against the Twitch `/users` endpoint. You'll need your extension client ID as part of the query (this will be made consistent with the Developer Rig shortly, by using _owner name_).
+For example, to clone this into a `extensions-boilerplate` folder, simply run the following in a command line interface:
 
 ```bash
-curl -H "Client-ID: <client id>" -X GET "https://api.twitch.tv/helix/users?login=<owner name>"
+git clone https://github.com/twitchdev/extensions-boilerplate
 ```
 
-**Note -** If you haven't yet created an extension, you can start that process [here](https://dev.twitch.tv/extensions).
+Next, do the following:
+
+1. Change directories into the cloned folder.
+2. Run `npm install` to install all prerequisite packages needed to run the template.
+3. Run `npm run start` to run the sample. By default, you should be be able to go to `https://localhost:8080/` and have the page show the instructions to get up and running. This README includes that same information. This sample requires it be run on <https://twitch.tv/> or the Twitch Developer Rig to utilize the Twitch Extension Helper.  
+   1. It should also give a certificate error- this is expected, as the sample uses a self-signed certificate to support HTTPS.
+   2. If you had to change the port (likely due to a port conflict), update the port in the URL above.
+
+#### Loading the Sample on Twitch
+
+1. Now that you have the boilerplate loaded and installed, you'll need two things first.
+    - Extension made on [the Twitch Developer Site](https://dev.twitch.tv/console).
+    - The extension installed on your own channel. This can be done in the "Invite Only" section of the Extension Store, where you'll find your extension listed.
+2. Once you've installed your extension, you'll need to activate the extension and add it to any of the available slots: Panel, Component, or Overlay. Do note that Component or Overlay extensions require you to be live when testing.
+3. Go to your channel on Twitch and you'll have to click on "Accept" on the extension. It should load.
+4. If it doesn't load, don't fret! Simply visit the URL for the view (<https://localhost:8080/panel.html> for a panel view, for example) and accept the certificate. Go back to your channel page on Twitch and you'll be good to go!
+
+## Moving to Hosted Test (and beyond!)
+
+When you are happy with how your extension looks locally, you can then move into Hosted Test on Twitch.
+
+1. Twitch will host your frontend assets for you. To upload your frontend files, zip the _contents_ of your `dist` directory after running `npm run build`. **Note that the contents of the `dist` directory must be at the root of your zip file. If you have trouble viewing your extension please make sure that your files are not wrapped in a parent folder at the root of the zip file.**
+   1. For OSX, you can run `zip -r ../dist.zip dist/*` in the `dist` folder to generate a properly formatted zip file.
+   2. For Windows, you can select all files in the folder and add to compressed archive.
+2. From the [developer dashboard](https://dev.twitch.tv/console/extensions/) for your extension, navigate to the Files tab and upload your zip file. This could take a few minutes if your project is large.
+3. Once your front end files are uploaded, go back to the Status tab and click on "Move To Hosted Test".
+4. You should now be able to add your extension to your Twitch page and see what it looks like on your page. There is a handy link to do that in the dashboard using the "View on Twitch and Install" button!
+
+### Webpack Config
+
+The Webpack config is stored under `/webpack.config.js`. Adjusting the config will allow you to disable building code for unneeded extension views. To do so, simply turn the `build` attribute on the path to `false`.
+
+One fairly important note is that the current configuration does not minimize the Webpack output. This is to help with the extension review policy, as turning this setting to minimize will guarantee that review will need full source to complete the review.
+
+Additionally, feel free to modify the code as needed to add either additional plugins (via modifying the plugins variable at the top) or simply adjusting/tuning the output from Webpack.
+
+### Authentication
+
+There is a basic Authentication class included in this boilerplate to handle simple use-cases for tokens/JWTs.
+
+It is important to note that this class does not validate that the token is legitimate, and instead should only be used for presentational purposes.
+
+If you need to use the token for any logic/permissioning, please have your EBS validate the token on request using the `makeCall()` method as provided in the function. This will automatically pass the JWT to the endpoint provided.
+
+To initialize the class:  
+
+```javascript
+const Authentication = require('../Authentication/Authentication');
+this.Authentication = new Authentication();
+```
+
+To set a token:
+
+```javascript
+window.Twitch.ext.onAuthorized(auth=>{
+    this.Authentication.setToken(auth.token,auth.userId)
+})
+```
+
+This then enables you to call a number of functions based on the token. The other functions are blind to whether the token is actually signed by Twitch, however, and should be only used for presentational purposes. Any requests to the backend should validate that the token is signed correctly by comparing signatures.
+
+For a small demonstration of the class, see the App component.
+
+## File Structure
+
+The file structure in the template is laid out with the following:
+
+### dist
+
+`/dist` holds the final JS files after building. You can simply zip up the contents of the folder to upload to Twitch to move to Hosted Test, as noted above.
+
+### public
+
+`/public` houses the static HTML files used for your code's entrypoint. If you need to add new entrypoints (for something custom, such as a specific view that's only for a subset of users), simply add it to the webpack config and add a new copy of the file here.
+
+### src
+
+This folder houses all source code and relevant files (such as images). Each React class/component is given a folder under `components` to house all associated files (such as associated CSS).
+
+Below this folder, the structure is much simpler.
+
+This would be:
+
+```path
+components\
+-\App\
+--\App.js
+--\App.test.js
+--\App.css
+...
+-\util\
+--\Authentication\
+---\Authentication.js
+---\Authentication.test.js
+```
