@@ -152,7 +152,7 @@
     "whitelistedPanelUrls": []
   },
   "frontendCommand": "npm run start",
-  "frontendFolderName": "D:\\Users\\TMinz\\Documents\\GitHub\\SmashQueue",
+  "frontendFolderName": "C:\\Users\\jbass\\Documents\\SmashQueue",
   "name": "Smash Queue",
   "version": 2
 }
